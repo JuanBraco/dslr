@@ -5,7 +5,16 @@ import sys
 
 
 def main():
-    dataset = load(f'data/{sys.argv[1]}')
+    try:
+        if len(sys.argv) > 2:
+            raise AssertionError("Incorrect number of arguments")
+        dataset = load(f'data/{sys.argv[1]}')
+        if dataset is None:
+            return
+    except AssertionError as error:
+        print(AssertionError.__name__ + ":", error)
+        return
+
     numerical_dataset = dataset.select_dtypes(include=['int', 'float'])
 
     d = {}
