@@ -1,10 +1,11 @@
 from load_csv import load
 import ft_stat
 import pandas as pd
+import sys
 
 
 def main():
-    dataset = load("data/dataset_train.csv")
+    dataset = load(f'data/{sys.argv[1]}')
     numerical_dataset = dataset.select_dtypes(include=['int', 'float'])
 
     d = {}
