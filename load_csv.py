@@ -2,7 +2,7 @@ import pandas as pd
 import os
 
 
-def load(path: str) -> pd.DataFrame:
+def load(path: str, index=0) -> pd.DataFrame:
     """
     Load a CSV dataset from the specified path and return it as a pandas
     DataFrame.
@@ -19,7 +19,7 @@ def load(path: str) -> pd.DataFrame:
             raise AssertionError("The file doesnt exist")
         if not path.lower().endswith('.csv'):
             raise AssertionError("The file format is not .csv")
-        dataset = pd.read_csv(path)
+        dataset = pd.read_csv(path, index_col=index)
         print(f"Loading dataset of dimensions {dataset.shape}")
         return dataset
     except AssertionError as error:

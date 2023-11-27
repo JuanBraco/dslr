@@ -38,3 +38,7 @@ def ft_quartile(args):
 def ft_var(args):
     mean = ft_mean(args)
     return sum((x - mean) ** 2 for x in args) / (len(args) - 1)
+
+
+def normalize(x):
+    return ((x - x.min()) / (x.max() - x.min()))
