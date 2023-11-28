@@ -17,22 +17,22 @@ class LogisticRegression():
         self.weights = None
         self.bias = None
 
-    def fit(self, matrice_features, vector_of_truth):
-        n_samples, n_features = matrice_features.shape
+    def fit(self, features_matrix, training_results):
+        n_samples, n_features = features_matrix.shape
         self.weights = np.zeros(n_features)
         self.bias = 0
 
         for _ in range(self.n_iters):
-            linear_pred = np.dot(matrice_features, self.weights) + self.bias
-            pred_one_vs_All = sigmoid(linear_pred)
+            linear_pred = np.dot(features_matrix, self.weights) + self.bias
+            logistic_pred = sigmoid(linear_pred)
 
-            dw = (1 / n_samples) * np.dot(matrice_features.T,
-                                          (pred_one_vs_All - vector_of_truth))
-            db = (1 / n_samples) * np.sum(pred_one_vs_All - vector_of_truth)
+            dw = (1 / n_samples) * np.dot(features_matrix.T,
+                                          (logistic_pred - training_results))
+            db = (1 / n_samples) * np.sum(logistic_pred - training_results)
 
             self.weights = self.weights - self.lr * dw
             self.bias = self.bias - self.lr * db
-        return self.weights
+        return self.weights, self.bias
 
 
 def parse_arguments():
@@ -59,13 +59,16 @@ def main():
                                 "Defense Against the Dark Arts"], inplace=True)
     # drop rows with nan values
     cleaned_df = normalized_df.dropna().reset_index(drop=True)
-    weights = {}
+    results = {}
     X_train = cleaned_df.drop(columns=['House'])
     for house in cleaned_df["House"].unique():
         y_train = cleaned_df["House"].map(lambda x: x == house)
         clf = LogisticRegression()
-        weights[house] = clf.fit(X_train, y_train)
-    res = pd.DataFrame(weights, index=X_train.columns)
+        weights, bias = clf.fit(X_train, y_train)
+        results[house] = np.append(weights, bias)
+    index = list(X_train.columns)
+    index.append("Bias")
+    res = pd.DataFrame(results, index=index)
     res.index.name = "Subject"
     try:
         res.to_csv("weights.csv")
