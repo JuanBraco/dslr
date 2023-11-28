@@ -4,6 +4,7 @@ from load_csv import load
 from ft_stat import normalize
 import argparse
 import sys
+from tqdm import tqdm
 
 
 def sigmoid(x):
@@ -11,17 +12,17 @@ def sigmoid(x):
 
 
 class LogisticRegression():
-    def __init__(self, lr=0.05, n_iters=5000):
+    def __init__(self, lr=0.05, n_iters=5000, pbar=None):
         self.lr = lr
         self.n_iters = n_iters
         self.weights = None
         self.bias = None
+        self.pbar = pbar
 
     def fit(self, features_matrix, training_results):
         n_samples, n_features = features_matrix.shape
         self.weights = np.zeros(n_features)
         self.bias = 0
-
         for _ in range(self.n_iters):
             linear_pred = np.dot(features_matrix, self.weights) + self.bias
             logistic_pred = sigmoid(linear_pred)
@@ -32,6 +33,8 @@ class LogisticRegression():
 
             self.weights = self.weights - self.lr * dw
             self.bias = self.bias - self.lr * db
+            if self.pbar is not None:
+                self.pbar.update(1)
         return self.weights, self.bias
 
 
@@ -59,13 +62,16 @@ def main():
                                 "Defense Against the Dark Arts"], inplace=True)
     # drop rows with nan values
     cleaned_df = normalized_df.dropna().reset_index(drop=True)
+    nb_iters = 5000
     results = {}
     X_train = cleaned_df.drop(columns=['House'])
-    for house in cleaned_df["House"].unique():
-        y_train = cleaned_df["House"].map(lambda x: x == house)
-        clf = LogisticRegression()
-        weights, bias = clf.fit(X_train, y_train)
-        results[house] = np.append(weights, bias)
+    with tqdm(total=len(cleaned_df["House"].unique()) * nb_iters,
+              desc="Model training") as pbar:
+        for house in cleaned_df["House"].unique():
+            y_train = cleaned_df["House"].map(lambda x: x == house)
+            clf = LogisticRegression(n_iters=nb_iters, pbar=pbar)
+            weights, bias = clf.fit(X_train, y_train)
+            results[house] = np.append(weights, bias)
     index = list(X_train.columns)
     index.append("Bias")
     res = pd.DataFrame(results, index=index)
