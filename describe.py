@@ -10,6 +10,7 @@ def main():
             raise AssertionError("Incorrect number of arguments")
         dataset = load(f'data/{sys.argv[1]}')
         if dataset is None:
+            print("Error when loading dataset", file=sys.stderr)
             return
     except AssertionError as error:
         print(AssertionError.__name__ + ":", error)

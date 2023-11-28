@@ -3,6 +3,7 @@ from ft_stat import normalize
 import matplotlib.pyplot as plt
 import seaborn as sns
 import argparse
+import sys
 
 graph_names = ["stacked_bars", "overlapped_bars", "overlapped_steps",
                "overlapped_density", "separated_density"]
@@ -37,6 +38,9 @@ def parse_arguments():
 def main():
     args = parse_arguments()
     dataset = load("data/dataset_train.csv")
+    if dataset is None:
+        print("Error when loading dataset", file=sys.stderr)
+        return
     numerical_dataset = dataset.select_dtypes(include=['int', 'float'])
 
     normalized_df = numerical_dataset.transform(normalize)

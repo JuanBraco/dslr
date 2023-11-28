@@ -4,6 +4,7 @@ import itertools
 from load_csv import load
 import argparse
 from ft_stat import normalize
+import sys
 
 graph_names = ["all_features", "similar_features"]
 graph_types = {
@@ -28,6 +29,9 @@ def parse_arguments():
 def main():
     args = parse_arguments()
     dataset = load("data/dataset_train.csv")
+    if dataset is None:
+        print("Error when loading dataset", file=sys.stderr)
+        return
     numerical_dataset = dataset.select_dtypes(include=['int', 'float'])
     normalized_df = numerical_dataset.transform(normalize)
 
