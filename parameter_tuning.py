@@ -39,6 +39,10 @@ class LogisticRegression():
 
     def predict(self, matrice_features):
         linear_pred = np.dot(matrice_features, self.weights) + self.bias
+        print(matrice_features.shape, self.weights.shape, self.bias.shape)
+        print(self.bias)
+        print(type(matrice_features), type(self.weights))
+        print(linear_pred.shape)
         y_pred = sigmoid(linear_pred)
         return y_pred
 

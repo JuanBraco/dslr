@@ -10,11 +10,11 @@ def sigmoid(x):
     return 1 / (1 + np.exp(-x))
 
 
-def predict(weights, bias, matrice_features):
+def predict(matrice_features, weights, bias):
     linear_pred = np.dot(matrice_features, weights) + bias
     y_pred = sigmoid(linear_pred)
     print('y_pred', y_pred)
-    sns.histplot(y_pred)
+    # sns.histplot(y_pred)
     return y_pred
 
 
@@ -38,15 +38,12 @@ def main():
                                           "Care of Magical Creatures",
                                           "Defense Against the Dark Arts",
                                           'Hogwarts House'])
-    print(weights)
-    print(weights.iloc[10])
 
     bias = weights.iloc[10]
 
     weights.drop(index=weights.index[-1], axis=0, inplace=True)
-    print(weights['Gryffindor'].values)
 
-    pred_Gryffindor = predict(X_train, weights['Gryffindor'].values.transpose(),
+    pred_Gryffindor = predict(X_train, weights['Gryffindor'].values,
                               bias['Gryffindor'])
     pred_Ravenclaw = predict(X_train, weights['Ravenclaw'].values.transpose(),
                              bias['Ravenclaw'])
