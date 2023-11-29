@@ -1,5 +1,5 @@
 from load_csv import load
-from ft_stat import normalize
+from ft_stat import standardization
 import matplotlib.pyplot as plt
 import seaborn as sns
 import sys
@@ -26,7 +26,7 @@ def main():
         print("Error when loading dataset", file=sys.stderr)
         return
     numerical_dataset = dataset.select_dtypes(include=['int', 'float'])
-    normalized_df = numerical_dataset.transform(normalize)
+    normalized_df = numerical_dataset.transform(standardization)
     normalized_df["House"] = dataset["Hogwarts House"]
     if args.features == 1:
         '''we can drop Arithmancy and Care of Magical Creatures as we saw\

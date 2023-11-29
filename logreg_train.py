@@ -1,7 +1,7 @@
 import numpy as np
 import pandas as pd
 from load_csv import load
-from ft_stat import normalize
+from ft_stat import standardization
 import argparse
 import sys
 from tqdm import tqdm
@@ -105,7 +105,7 @@ def main():
         print("Error when loading dataset", file=sys.stderr)
         return
     numerical_dataset = dataset.select_dtypes(include=['int', 'float'])
-    normalized_df = numerical_dataset.transform(normalize)
+    normalized_df = numerical_dataset.transform(standardization)
     normalized_df["House"] = dataset["Hogwarts House"]
     # remove columns not useful for house predictions
     normalized_df.drop(columns=["Arithmancy", "Care of Magical Creatures",

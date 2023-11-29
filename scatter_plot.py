@@ -3,7 +3,7 @@ import seaborn as sns
 import itertools
 from load_csv import load
 import argparse
-from ft_stat import normalize
+from ft_stat import standardization
 import sys
 
 graph_names = ["all_features", "similar_features"]
@@ -33,7 +33,7 @@ def main():
         print("Error when loading dataset", file=sys.stderr)
         return
     numerical_dataset = dataset.select_dtypes(include=['int', 'float'])
-    normalized_df = numerical_dataset.transform(normalize)
+    normalized_df = numerical_dataset.transform(standardization)
 
     normalized_df.rename(
         columns={'Defense Against the Dark Arts': 'Defense',

@@ -1,3 +1,6 @@
+import pandas as pd
+
+
 def clean_list(args):
     return [x for x in args if x == x]
 
@@ -9,7 +12,13 @@ def ft_min_max(args):
 
 def ft_mean(args):
     """calculating mean"""
-    return sum(args) / len(args)
+    if isinstance(args, (pd.DataFrame, pd.Series)):
+        clean_args = [x for x in args if pd.notna(x)]
+    else:
+        clean_args = [x for x in args if x == x]
+    if len(clean_args) == 0:
+        return float('nan')
+    return sum(clean_args) / len(clean_args)
 
 
 def ft_median(args):
@@ -36,9 +45,24 @@ def ft_quartile(args):
 
 
 def ft_var(args):
-    mean = ft_mean(args)
-    return sum((x - mean) ** 2 for x in args) / (len(args) - 1)
+    if isinstance(args, (pd.DataFrame, pd.Series)):
+        clean_args = [x for x in args if pd.notna(x)]
+    else:
+        clean_args = [x for x in args if x == x]
+    mean = ft_mean(clean_args)
+    n = len(clean_args)
+    if n <= 1:
+        return float('nan')
+    return sum((x - mean) ** 2 for x in clean_args) / (n - 1)
 
 
-def normalize(x):
-    return ((x - x.min()) / (x.max() - x.min()))
+def standardization(args):
+    if isinstance(args, pd.Series):
+        mean_x = ft_mean(args)
+        std_x = ft_var(args) ** 0.5
+        return args.apply(lambda xi: (xi - mean_x) / std_x if pd.notna(xi) else float('nan'))
+    else:
+        # Handle the case where x is a list
+        mean_x = ft_mean(args)
+        std_x = ft_var(args) ** 0.5
+        return [(xi - mean_x) / std_x if xi == xi else float('nan') for xi in args]

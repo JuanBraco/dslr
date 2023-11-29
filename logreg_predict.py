@@ -3,7 +3,7 @@ import numpy as np
 import sys
 import csv
 import seaborn as sns
-from ft_stat import normalize
+from ft_stat import standardization
 
 
 def sigmoid(x):
@@ -32,7 +32,12 @@ def main():
         return
 
     numerical_dataset = dataset.select_dtypes(include=['int', 'float'])
-    normalized_df = numerical_dataset.transform(normalize)
+    mean_values = numerical_dataset.mean()
+
+    numerical_dataset_filled = numerical_dataset.fillna(mean_values)
+    numerical_dataset_filled.head()
+
+    normalized_df = numerical_dataset.transform(standardization)
 
     X_train = normalized_df.drop(columns=["Arithmancy",
                                           "Care of Magical Creatures",

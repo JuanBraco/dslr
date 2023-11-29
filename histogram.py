@@ -1,5 +1,5 @@
 from load_csv import load
-from ft_stat import normalize
+from ft_stat import standardization
 import matplotlib.pyplot as plt
 import seaborn as sns
 import argparse
@@ -43,8 +43,11 @@ def main():
         return
     numerical_dataset = dataset.select_dtypes(include=['int', 'float'])
 
-    normalized_df = numerical_dataset.transform(normalize)
+    print(numerical_dataset)
+    normalized_df = numerical_dataset.transform(standardization)
     normalized_df["House"] = dataset["Hogwarts House"]
+
+    print(normalized_df)
 
     length = len(normalized_df.columns) - 1
 
