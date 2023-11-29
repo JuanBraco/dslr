@@ -104,43 +104,44 @@ def main():
     if dataset is None:
         print("Error when loading dataset", file=sys.stderr)
         return
-    numerical_dataset = dataset.select_dtypes(include=['int', 'float'])
-    normalized_df = numerical_dataset.transform(standardization)
-    normalized_df["House"] = dataset["Hogwarts House"]
-    # remove columns not useful for house predictions
-    normalized_df.drop(columns=["Arithmancy", "Care of Magical Creatures",
-                                "Defense Against the Dark Arts"], inplace=True)
-    # drop rows with nan values
-    cleaned_df = normalized_df.dropna().reset_index(drop=True)
-    nb_iters = 5000
-    lr = 0.05
-    results = {}
-    preds = {}
-    train_df = cleaned_df.sample(frac=0.8, random_state=100)
-    test_df = cleaned_df.drop(train_df.index)
-    X_train = train_df.drop(columns=['House'])
-    X_test = test_df.drop(columns=['House'])
-    with tqdm(total=len(cleaned_df["House"].unique()) * nb_iters,
-              desc="Model training") as pbar:
-        for house in cleaned_df["House"].unique():
-            y_train = train_df["House"].map(lambda x: x == house)
-            y_test = test_df["House"].map(lambda x: x == house)
-            clf = LogisticRegression(house=house, n_iters=nb_iters,
-                                     lr=lr, pbar=pbar, testing=args.t)
-            res = clf.fit(X_train, y_train, X_test, y_test)
-            results[house] = np.append(res["weights"], res["bias"])
-            preds[house] = clf.predict(X_test)
-    if args.t:
-        print(f"lr: {lr}, nb_iters: {nb_iters}")
-        test_model_accuracy(preds, test_df["House"])
-    index = list(X_train.columns)
-    index.append("Bias")
-    res = pd.DataFrame(results, index=index)
-    res.index.name = "Subject"
     try:
+        numerical_dataset = dataset.select_dtypes(include=['int', 'float'])
+        normalized_df = numerical_dataset.transform(standardization)
+        normalized_df["House"] = dataset["Hogwarts House"]
+        # remove columns not useful for house predictions
+        normalized_df.drop(columns=["Arithmancy", "Care of Magical Creatures",
+                                    "Defense Against the Dark Arts"],
+                           inplace=True)
+        # drop rows with nan values
+        cleaned_df = normalized_df.dropna().reset_index(drop=True)
+        nb_iters = 5000
+        lr = 0.05
+        results = {}
+        preds = {}
+        train_df = cleaned_df.sample(frac=0.8, random_state=100)
+        test_df = cleaned_df.drop(train_df.index)
+        X_train = train_df.drop(columns=['House'])
+        X_test = test_df.drop(columns=['House'])
+        with tqdm(total=len(cleaned_df["House"].unique()) * nb_iters,
+                  desc="Model training") as pbar:
+            for house in cleaned_df["House"].unique():
+                y_train = train_df["House"].map(lambda x: x == house)
+                y_test = test_df["House"].map(lambda x: x == house)
+                clf = LogisticRegression(house=house, n_iters=nb_iters,
+                                         lr=lr, pbar=pbar, testing=args.t)
+                res = clf.fit(X_train, y_train, X_test, y_test)
+                results[house] = np.append(res["weights"], res["bias"])
+                preds[house] = clf.predict(X_test)
+        if args.t:
+            print(f"lr: {lr}, nb_iters: {nb_iters}")
+            test_model_accuracy(preds, test_df["House"])
+        index = list(X_train.columns)
+        index.append("Bias")
+        res = pd.DataFrame(results, index=index)
+        res.index.name = "Subject"
         res.to_csv("weights.csv")
     except Exception as e:
-        print(f"Error when exporting res: {e}", file=sys.stderr)
+        print(f"{Exception.__name__}: {e}", file=sys.stderr)
 
 
 if __name__ == "__main__":
