@@ -2,7 +2,6 @@ from load_csv import load
 import numpy as np
 import sys
 import csv
-import seaborn as sns
 from ft_stat import standardization
 
 
@@ -23,7 +22,7 @@ def main():
         if len(sys.argv) > 3:
             raise AssertionError("Incorrect number of arguments")
         dataset = load(f'data/{sys.argv[1]}')
-        weights = load(sys.argv[2])
+        weight = load(sys.argv[2])
         if dataset is None:
             print("Error when loading dataset", file=sys.stderr)
             return
@@ -40,17 +39,17 @@ def main():
                                        "Defense Against the Dark Arts",
                                        'Hogwarts House'])
 
-    bias = weights.iloc[10]
+    bias = weight.iloc[10]
 
-    weights.drop(index=weights.index[-1], axis=0, inplace=True)
+    weight.drop(index=weight.index[-1], axis=0, inplace=True)
 
-    pred_Gryffindor = predict(X_train, weights['Gryffindor'].values,
+    pred_Gryffindor = predict(X_train, weight['Gryffindor'].values,
                               bias['Gryffindor'])
-    pred_Ravenclaw = predict(X_train, weights['Ravenclaw'].values.transpose(),
+    pred_Ravenclaw = predict(X_train, weight['Ravenclaw'].values.transpose(),
                              bias['Ravenclaw'])
-    pred_Slytherin = predict(X_train, weights['Slytherin'].values.transpose(),
+    pred_Slytherin = predict(X_train, weight['Slytherin'].values.transpose(),
                              bias['Slytherin'])
-    pred_Hufflepuff = predict(X_train, weights['Hufflepuff'].values.transpose(),
+    pred_Hufflepuff = predict(X_train, weight['Hufflepuff'].values.transpose(),
                               bias['Hufflepuff'])
 
     max_values = np.amax(np.array([pred_Gryffindor,
@@ -60,17 +59,19 @@ def main():
     res = []
     for i, x in enumerate(max_values):
         if x == pred_Gryffindor[i]:
-            res.append("Gryffindor")
+            res.append([i, "Gryffindor"])
         elif x == pred_Ravenclaw[i]:
-            res.append("Ravenclaw")
+            res.append([i, "Ravenclaw"])
         elif x == pred_Slytherin[i]:
-            res.append("Slytherin")
+            res.append([i, "Slytherin"])
         elif x == pred_Hufflepuff[i]:
-            res.append("Hufflepuff")
+            res.append([i, "Hufflepuff"])
+    
     with open('houses.csv', 'w', newline='') as file:
         # Step 4: Using csv.writer to write the list to the CSV file
         writer = csv.writer(file)
-        writer.writerow(res)  # Use writerow for single list
+        writer.writerow(['Index', 'Hogwarts House'])
+        writer.writerows(res)  # Use writerow for single list
 
 
 if __name__ == "__main__":
