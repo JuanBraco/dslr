@@ -32,17 +32,13 @@ def main():
         return
 
     numerical_dataset = dataset.select_dtypes(include=['int', 'float'])
-    mean_values = numerical_dataset.mean()
 
-    numerical_dataset_filled = numerical_dataset.fillna(mean_values)
-    numerical_dataset_filled.head()
+    stdized_df = numerical_dataset.transform(standardization).fillna(0)
 
-    normalized_df = numerical_dataset.transform(standardization)
-
-    X_train = normalized_df.drop(columns=["Arithmancy",
-                                          "Care of Magical Creatures",
-                                          "Defense Against the Dark Arts",
-                                          'Hogwarts House'])
+    X_train = stdized_df.drop(columns=["Arithmancy",
+                                       "Care of Magical Creatures",
+                                       "Defense Against the Dark Arts",
+                                       'Hogwarts House'])
 
     bias = weights.iloc[10]
 
@@ -63,7 +59,6 @@ def main():
                                    pred_Hufflepuff]), axis=0)
     res = []
     for i, x in enumerate(max_values):
-        # print(x, pred_Gryffindor[i])
         if x == pred_Gryffindor[i]:
             res.append("Gryffindor")
         elif x == pred_Ravenclaw[i]:
