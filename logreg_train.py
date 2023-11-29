@@ -5,6 +5,8 @@ from ft_stat import standardization
 import argparse
 import sys
 from tqdm import tqdm
+import matplotlib.pyplot as plt
+import seaborn as sns
 
 
 def sigmoid(x):
@@ -12,7 +14,8 @@ def sigmoid(x):
 
 
 class LogisticRegression():
-    def __init__(self, house, lr=0.05, n_iters=5000, pbar=None, testing=False):
+    def __init__(self, house, lr=0.001, n_iters=1000, pbar=None,
+                 testing=False):
         self.house = house
         self.lr = lr
         self.n_iters = n_iters
@@ -20,7 +23,8 @@ class LogisticRegression():
         self.weights = None
         self.bias = None
         self.pbar = pbar
-        self.accuracy = [0, 0]
+        self.loss = [float('inf'), 0]
+        self.loss_evolution = []
         self.results = {}
 
     def predict_binary(self, X_test):
@@ -38,6 +42,13 @@ class LogisticRegression():
     def compute_accuracy(y_pred, y_test):
         return np.sum(y_pred == y_test) / len(y_test)
 
+    @staticmethod
+    def compute_loss(y_pred, y_test):
+        y_test, y_pred = np.array(y_test), np.array(y_pred)
+        loss_vector = (y_test * np.log(y_pred) +
+                       (1 - y_test) * np.log(1 - y_pred))
+        return -1 / len(y_test) * sum(loss_vector)
+
     def fit(self, X_train, y_train, X_test, y_test):
         n_samples, n_features = X_train.shape
         self.weights = np.zeros(n_features)
@@ -46,12 +57,13 @@ class LogisticRegression():
             linear_pred = np.dot(X_train, self.weights) + self.bias
             logistic_pred = sigmoid(linear_pred)
 
-            test_pred = self.predict_binary(X_test)
-            accuracy = LogisticRegression.compute_accuracy(test_pred, y_test)
-            if accuracy > self.accuracy[0]:
+            test_pred = self.predict(X_test)
+            loss = LogisticRegression.compute_loss(test_pred, y_test)
+            self.loss_evolution.append(loss)
+            if loss < self.loss[0]:
                 self.results["weights"] = self.weights
                 self.results["bias"] = self.bias
-                self.accuracy[0], self.accuracy[1] = accuracy, i
+                self.loss[0], self.loss[1] = loss, i
             dw = (1 / n_samples) * np.dot(X_train.T,
                                           (logistic_pred - y_train))
             db = (1 / n_samples) * np.sum(logistic_pred - y_train)
@@ -61,12 +73,15 @@ class LogisticRegression():
             if self.pbar is not None:
                 self.pbar.update(1)
         if self.testing:
-            print(f"max accuracy for {self.house}: {self.accuracy[0]} "
-                  f"reached in {self.accuracy[1]} iterations")
+            print(f"min loss for {self.house}: {self.loss[0]} "
+                  f"reached in {self.loss[1]} iterations")
         # reset weights and bias to optimal values
         self.weights = self.results["weights"]
         self.bias = self.results["bias"]
         return self.results
+
+    def get_loss_evolution(self):
+        return self.loss_evolution
 
 
 def parse_arguments():
@@ -98,50 +113,70 @@ def test_model_accuracy(pred, y_test):
           f"{LogisticRegression.compute_accuracy(res, y_test)}")
 
 
+def plot_loss(losses):
+    fig, axes = plt.subplots(2, 2, figsize=(18, 10))
+    fig.suptitle("Loss evolution over iterations for each house classifier")
+    i, j = 0, 0
+    for house in losses.keys():
+        sns.lineplot(ax=axes[i][j], data=losses[house])
+        axes[i][j].set(xlabel="Iterations number", ylabel="Loss in %",
+                       title=house)
+        if j == 1:
+            j = 0
+            i += 1
+        else:
+            j += 1
+    plt.tight_layout()
+    plt.show()
+
+
 def main():
     args = parse_arguments()
     dataset = load(args.file)
     if dataset is None:
         print("Error when loading dataset", file=sys.stderr)
         return
-    try:
-        numerical_dataset = dataset.select_dtypes(include=['int', 'float'])
-        normalized_df = numerical_dataset.transform(standardization)
-        normalized_df["House"] = dataset["Hogwarts House"]
-        # remove columns not useful for house predictions
-        normalized_df.drop(columns=["Arithmancy", "Care of Magical Creatures",
-                                    "Defense Against the Dark Arts"],
-                           inplace=True)
-        # drop rows with nan values
-        cleaned_df = normalized_df.dropna().reset_index(drop=True)
-        nb_iters = 5000
-        lr = 0.05
-        results = {}
-        preds = {}
-        train_df = cleaned_df.sample(frac=0.8, random_state=100)
-        test_df = cleaned_df.drop(train_df.index)
-        X_train = train_df.drop(columns=['House'])
-        X_test = test_df.drop(columns=['House'])
-        with tqdm(total=len(cleaned_df["House"].unique()) * nb_iters,
-                  desc="Model training") as pbar:
-            for house in cleaned_df["House"].unique():
-                y_train = train_df["House"].map(lambda x: x == house)
-                y_test = test_df["House"].map(lambda x: x == house)
-                clf = LogisticRegression(house=house, n_iters=nb_iters,
-                                         lr=lr, pbar=pbar, testing=args.t)
-                res = clf.fit(X_train, y_train, X_test, y_test)
-                results[house] = np.append(res["weights"], res["bias"])
-                preds[house] = clf.predict(X_test)
-        if args.t:
-            print(f"lr: {lr}, nb_iters: {nb_iters}")
-            test_model_accuracy(preds, test_df["House"])
-        index = list(X_train.columns)
-        index.append("Bias")
-        res = pd.DataFrame(results, index=index)
-        res.index.name = "Subject"
-        res.to_csv("weights.csv")
-    except Exception as e:
-        print(f"{Exception.__name__}: {e}", file=sys.stderr)
+    # try:
+    numerical_dataset = dataset.select_dtypes(include=['int', 'float'])
+    normalized_df = numerical_dataset.transform(standardization)
+    normalized_df["House"] = dataset["Hogwarts House"]
+    # remove columns not useful for house predictions
+    normalized_df.drop(columns=["Arithmancy", "Care of Magical Creatures",
+                                "Defense Against the Dark Arts"],
+                       inplace=True)
+    # drop rows with nan values
+    cleaned_df = normalized_df.dropna().reset_index(drop=True)
+    nb_iters = 5000
+    lr = 0.05
+    results = {}
+    preds = {}
+    losses = {}
+    train_df = cleaned_df.sample(frac=0.8, random_state=100)
+    test_df = cleaned_df.drop(train_df.index)
+    X_train = train_df.drop(columns=['House'])
+    X_test = test_df.drop(columns=['House'])
+    with tqdm(total=len(cleaned_df["House"].unique()) * nb_iters,
+              desc="Model training") as pbar:
+        for house in cleaned_df["House"].unique():
+            y_train = train_df["House"].map(lambda x: 1 if x == house else 0)
+            y_test = test_df["House"].map(lambda x: 1 if x == house else 0)
+            clf = LogisticRegression(house=house, n_iters=nb_iters,
+                                     lr=lr, pbar=pbar, testing=args.t)
+            res = clf.fit(X_train, y_train, X_test, y_test)
+            results[house] = np.append(res["weights"], res["bias"])
+            preds[house] = clf.predict(X_test)
+            losses[house] = clf.get_loss_evolution()
+    if args.t:
+        print(f"lr: {lr}, nb_iters: {nb_iters}")
+        test_model_accuracy(preds, test_df["House"])
+        plot_loss(losses)
+    index = list(X_train.columns)
+    index.append("Bias")
+    res = pd.DataFrame(results, index=index)
+    res.index.name = "Subject"
+    res.to_csv("weights.csv")
+    # except Exception as e:
+    #     print(f"{Exception.__name__}: {e}", file=sys.stderr)
 
 
 if __name__ == "__main__":

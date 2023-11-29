@@ -61,8 +61,8 @@ def main():
             ax.set_title(f'{column[i]} vs {column[j]}', fontsize=6, pad=1)
             ax.set_xlabel('')
             ax.set_ylabel('')
-            ax.set_xticks([0, 1])
-            ax.set_yticks([0, 1])
+            # ax.set_xticks([0, 1])
+            # ax.set_yticks([0, 1])
             ax.tick_params(axis='both', which='major', labelsize=6, pad=1)
             # ax.set_aspect('equal', adjustable='box')
 

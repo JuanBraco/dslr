@@ -3,6 +3,8 @@ import numpy as np
 import sys
 import csv
 from ft_stat import standardization
+import seaborn as sns
+import matplotlib.pyplot as plt
 
 
 def sigmoid(x):
@@ -41,7 +43,6 @@ def main():
         bias = weight.iloc[10]
 
         weight.drop(index=weight.index[-1], axis=0, inplace=True)
-        print(bias, weight)
 
         pred_Gryffindor = predict(X_train, weight['Gryffindor'].values,
                                   bias['Gryffindor'])
@@ -56,6 +57,8 @@ def main():
                                       pred_Ravenclaw,
                                       pred_Slytherin,
                                       pred_Hufflepuff]), axis=0)
+        sns.histplot(max_values)
+        plt.show()
         res = []
         for i, x in enumerate(max_values):
             if x == pred_Gryffindor[i]:
