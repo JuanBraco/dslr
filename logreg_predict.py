@@ -59,17 +59,19 @@ def main():
     res = []
     for i, x in enumerate(max_values):
         if x == pred_Gryffindor[i]:
-            res.append("Gryffindor")
+            res.append([i, "Gryffindor"])
         elif x == pred_Ravenclaw[i]:
-            res.append("Ravenclaw")
+            res.append([i, "Ravenclaw"])
         elif x == pred_Slytherin[i]:
-            res.append("Slytherin")
+            res.append([i, "Slytherin"])
         elif x == pred_Hufflepuff[i]:
-            res.append("Hufflepuff")
+            res.append([i, "Hufflepuff"])
+    
     with open('houses.csv', 'w', newline='') as file:
         # Step 4: Using csv.writer to write the list to the CSV file
         writer = csv.writer(file)
-        writer.writerow(res)  # Use writerow for single list
+        writer.writerow(['Index', 'Hogwarts House'])
+        writer.writerows(res)  # Use writerow for single list
 
 
 if __name__ == "__main__":
