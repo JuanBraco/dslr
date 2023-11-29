@@ -68,3 +68,8 @@ def standardization(args):
         std_x = ft_var(args) ** 0.5
         return [(xi - mean_x) / std_x if xi == xi
                 else float('nan') for xi in args]
+
+
+def normalize(args):
+    mini, maxi = ft_min_max(args)
+    return [(x - mini) / (maxi - mini) for x in args]

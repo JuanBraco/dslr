@@ -6,9 +6,9 @@ import sys
 
 def main():
     try:
-        if len(sys.argv) > 2:
+        if len(sys.argv) != 2:
             raise AssertionError("Incorrect number of arguments")
-        dataset = load(f'data/{sys.argv[1]}')
+        dataset = load(sys.argv[1])
         if dataset is None:
             print("Error when loading dataset", file=sys.stderr)
             return
@@ -23,6 +23,7 @@ def main():
         if column == "Index" or column == "Best Hand":
             continue
         args = ft_stat.clean_list(list(numerical_dataset[column]))
+        normalized_args = ft_stat.normalize(args)
         count = len(args)
         mean = ft_stat.ft_mean(args)
         std = (ft_stat.ft_var(args)) ** 0.5
@@ -30,10 +31,15 @@ def main():
         first_q, third_q = ft_stat.ft_quartile(args)
         median = ft_stat.ft_median(args)
         d[column] = [count, mean, std, min, first_q, median, third_q, max]
-    index = ["count", "mean", "std", "min", "25%", "50%", "75%", "max"]
+        normalized_mean = ft_stat.ft_mean(normalized_args)
+        normalized_std = (ft_stat.ft_var(normalized_args)) ** 0.5
+        normalized_median = ft_stat.ft_median(normalized_args)
+        d[column] = [count, mean, std, min, first_q, median, third_q, max,
+                     normalized_mean, normalized_std, normalized_median]
+    index = ["count", "mean", "std", "min", "25%", "50%", "75%", "max",
+             "normalized_mean", "normalized_std", "normalized_median"]
     df = pd.DataFrame(d, index)
     print(df)
-    print(numerical_dataset.describe())
 
 
 if __name__ == "__main__":
