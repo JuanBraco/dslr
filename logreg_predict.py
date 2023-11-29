@@ -2,7 +2,6 @@ from load_csv import load
 import numpy as np
 import sys
 import csv
-import seaborn as sns
 from ft_stat import standardization
 
 
@@ -23,7 +22,7 @@ def main():
         if len(sys.argv) > 3:
             raise AssertionError("Incorrect number of arguments")
         dataset = load(f'data/{sys.argv[1]}')
-        weights = load(sys.argv[2])
+        weight = load(sys.argv[2])
         if dataset is None:
             print("Error when loading dataset", file=sys.stderr)
             return
@@ -40,17 +39,17 @@ def main():
                                        "Defense Against the Dark Arts",
                                        'Hogwarts House'])
 
-    bias = weights.iloc[10]
+    bias = weight.iloc[10]
 
-    weights.drop(index=weights.index[-1], axis=0, inplace=True)
+    weight.drop(index=weight.index[-1], axis=0, inplace=True)
 
-    pred_Gryffindor = predict(X_train, weights['Gryffindor'].values,
+    pred_Gryffindor = predict(X_train, weight['Gryffindor'].values,
                               bias['Gryffindor'])
-    pred_Ravenclaw = predict(X_train, weights['Ravenclaw'].values.transpose(),
+    pred_Ravenclaw = predict(X_train, weight['Ravenclaw'].values.transpose(),
                              bias['Ravenclaw'])
-    pred_Slytherin = predict(X_train, weights['Slytherin'].values.transpose(),
+    pred_Slytherin = predict(X_train, weight['Slytherin'].values.transpose(),
                              bias['Slytherin'])
-    pred_Hufflepuff = predict(X_train, weights['Hufflepuff'].values.transpose(),
+    pred_Hufflepuff = predict(X_train, weight['Hufflepuff'].values.transpose(),
                               bias['Hufflepuff'])
 
     max_values = np.amax(np.array([pred_Gryffindor,
