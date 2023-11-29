@@ -60,9 +60,11 @@ def standardization(args):
     if isinstance(args, pd.Series):
         mean_x = ft_mean(args)
         std_x = ft_var(args) ** 0.5
-        return args.apply(lambda xi: (xi - mean_x) / std_x if pd.notna(xi) else float('nan'))
+        return args.apply(lambda xi: (xi - mean_x) /
+                          std_x if pd.notna(xi) else float('nan'))
     else:
         # Handle the case where x is a list
         mean_x = ft_mean(args)
         std_x = ft_var(args) ** 0.5
-        return [(xi - mean_x) / std_x if xi == xi else float('nan') for xi in args]
+        return [(xi - mean_x) / std_x if xi == xi
+                else float('nan') for xi in args]
