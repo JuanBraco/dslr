@@ -1,7 +1,7 @@
 import numpy as np
 import pandas as pd
 from load_csv import load
-from ft_stat import normalize
+from ft_stat import standardization
 import argparse
 import sys
 from tqdm import tqdm
@@ -49,7 +49,7 @@ class LogisticRegression():
 
 def parse_arguments():
     parser = argparse.ArgumentParser(prog="logreg",
-                                    description="A program that trains\
+                                     description="A program that trains\
                                 a logistic regression model on provided data")
     parser.add_argument('file', metavar="FILE", type=str,
                         help='enter the chosen file for training')
@@ -58,7 +58,7 @@ def parse_arguments():
 
 
 def accuracy(y_pred, y_test):
-    return np.sum(y_pred==y_test)/len(y_test)
+    return np.sum(y_pred == y_test)/len(y_test)
 
     
 def main():
@@ -68,7 +68,7 @@ def main():
         print("Error when loading dataset", file=sys.stderr)
         return
     numerical_dataset = dataset.select_dtypes(include=['int', 'float'])
-    normalized_df = numerical_dataset.transform(normalize)
+    normalized_df = numerical_dataset.transform(standardization)
     normalized_df["House"] = dataset["Hogwarts House"]
     # remove columns not useful for house predictions
     normalized_df.drop(columns=["Arithmancy", "Care of Magical Creatures",
@@ -81,7 +81,7 @@ def main():
     for lr in [0.005, 0.01, 0.02, 0.05, 0.1, 0.5]:
         for nb_iters in [1000, 2000, 5000, 10000, 20000]:
             with tqdm(total=len(cleaned_df["House"].unique()) * nb_iters,
-                    desc="Model training") as pbar:
+                      desc="Model training") as pbar:
                 for house in cleaned_df["House"].unique():
                     y_train = cleaned_df["House"].map(lambda x: x == house)
                     clf = LogisticRegression(lr=lr, n_iters=nb_iters, pbar=pbar)
