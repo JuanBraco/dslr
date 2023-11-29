@@ -60,9 +60,9 @@ class LogisticRegression():
             self.bias = self.bias - self.lr * db
             if self.pbar is not None:
                 self.pbar.update(1)
-        # if self.testing:
-        #     print(f"max accuracy for {self.house}: {self.accuracy[0]} "
-        #           f"reached in {self.accuracy[1]} iterations")
+        if self.testing:
+            print(f"max accuracy for {self.house}: {self.accuracy[0]} "
+                  f"reached in {self.accuracy[1]} iterations")
         # reset weights and bias to optimal values
         self.weights = self.results["weights"]
         self.bias = self.results["bias"]
