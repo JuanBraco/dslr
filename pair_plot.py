@@ -4,6 +4,7 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 import sys
 import argparse
+import os
 
 
 def parse_arguments():
@@ -44,7 +45,9 @@ def main():
                            'common_norm': True})
     plt.tight_layout()
     try:
-        plt.savefig('pairplot.png', dpi=300, bbox_inches='tight')
+        if not os.path.exists("graphs/"):
+            os.mkdir("graphs")
+        plt.savefig('graphs/pairplot.png', dpi=300, bbox_inches='tight')
     except Exception as e:
         print(f"Error saving the image: {e}", file=sys.stderr)
 

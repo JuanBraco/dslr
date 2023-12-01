@@ -2,18 +2,25 @@ from load_csv import load
 import ft_stat
 import pandas as pd
 import sys
+import argparse
+
+
+def parse_arguments():
+    parser = argparse.ArgumentParser(prog="describe",
+                                     description="A program that analyzes\
+                                numerical features of a dataset")
+    parser.add_argument('file', metavar="FILE", type=str,
+                        help='enter the chosen file for analysis')
+    parser.add_argument('-b', action='store_true', help="bonus fields")
+    args = parser.parse_args()
+    return args
 
 
 def main():
-    try:
-        if len(sys.argv) != 2:
-            raise AssertionError("Incorrect number of arguments")
-        dataset = load(sys.argv[1])
-        if dataset is None:
-            print("Error when loading dataset", file=sys.stderr)
-            return
-    except AssertionError as error:
-        print(AssertionError.__name__ + ":", error)
+    main_args = parse_arguments()
+    dataset = load(main_args.file)
+    if dataset is None:
+        print("Error when loading dataset", file=sys.stderr)
         return
 
     numerical_dataset = dataset.select_dtypes(include=['int', 'float'])
@@ -31,13 +38,16 @@ def main():
         first_q, third_q = ft_stat.ft_quartile(args)
         median = ft_stat.ft_median(args)
         d[column] = [count, mean, std, min, first_q, median, third_q, max]
-        normalized_mean = ft_stat.ft_mean(normalized_args)
-        normalized_std = (ft_stat.ft_var(normalized_args)) ** 0.5
-        normalized_median = ft_stat.ft_median(normalized_args)
-        d[column] = [count, mean, std, min, first_q, median, third_q, max,
-                     normalized_mean, normalized_std, normalized_median]
-    index = ["count", "mean", "std", "min", "25%", "50%", "75%", "max",
-             "normalized_mean", "normalized_std", "normalized_median"]
+        if main_args.b:
+            normalized_mean = ft_stat.ft_mean(normalized_args)
+            normalized_std = (ft_stat.ft_var(normalized_args)) ** 0.5
+            normalized_median = ft_stat.ft_median(normalized_args)
+            d[column].extend([normalized_mean, normalized_std,
+                             normalized_median])
+    index = ["count", "mean", "std", "min", "25%", "50%", "75%", "max"]
+    if main_args.b:
+        index.extend(["normalized_mean", "normalized_std",
+                      "normalized_median"])
     df = pd.DataFrame(d, index)
     print(df)
 
