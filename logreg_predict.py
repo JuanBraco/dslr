@@ -57,8 +57,6 @@ def main():
                                       pred_Ravenclaw,
                                       pred_Slytherin,
                                       pred_Hufflepuff]), axis=0)
-        sns.histplot(max_values)
-        plt.show()
         res = []
         for i, x in enumerate(max_values):
             if x == pred_Gryffindor[i]:
@@ -71,10 +69,9 @@ def main():
                 res.append([i, "Hufflepuff"])
 
         with open('houses.csv', 'w', newline='') as file:
-            # Step 4: Using csv.writer to write the list to the CSV file
             writer = csv.writer(file)
             writer.writerow(['Index', 'Hogwarts House'])
-            writer.writerows(res)  # Use writerow for single list
+            writer.writerows(res)
     except Exception as e:
         print(f"{Exception.__name__}: {e}", file=sys.stderr)
 

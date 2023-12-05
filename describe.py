@@ -23,8 +23,8 @@ def main():
         print("Error when loading dataset", file=sys.stderr)
         return
 
-    numerical_dataset = dataset.select_dtypes(include=['int', 'float'])
-
+    dataset_without_houses = dataset.drop(columns=["Hogwarts House"])
+    numerical_dataset = dataset_without_houses.select_dtypes(include=['int', 'float'])
     d = {}
     for column in numerical_dataset:
         if column == "Index" or column == "Best Hand":
