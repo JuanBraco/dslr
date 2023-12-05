@@ -3,8 +3,6 @@ import numpy as np
 import sys
 import csv
 from ft_stat import standardization
-import seaborn as sns
-import matplotlib.pyplot as plt
 
 
 def sigmoid(x):
